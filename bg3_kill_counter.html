@@ -1,287 +1,273 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>BG3 Honour Mode Kill Counter</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&display=swap');
 
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+
+  <style>
     :root {
-      --bg: #000;
-      --text: #fff;
-      --input-bg: #111;
-      --input-border: #555;
-      --btn-bg: #444;
-      --btn-hover: #666;
-      --dial-bg: #111;
-      --dial-border: #666;
-      --accent: #ff5c5c;
+      --bg-color: #000;
+      --text-color: #fff;
+      --card-bg: #1a1a1a;
+      --border-color: #888;
+      --button-bg: #3e2d16;
+      --button-text: #f5e4c3;
+      --button-border: #b19973;
     }
 
-    .lightmode {
-      --bg: #fff;
-      --text: #000;
-      --input-bg: #eee;
-      --input-border: #ccc;
-      --btn-bg: #ccc;
-      --btn-hover: #aaa;
-      --dial-bg: #f0f0f0;
-      --dial-border: #888;
-      --accent: #c00;
+    .light-mode {
+      --bg-color: #fefbf3;
+      --text-color: #1a1a1a;
+      --card-bg: #fff6e6;
+      --border-color: #aaa;
+      --button-bg: #e6d5a8;
+      --button-text: #1a1a1a;
+      --button-border: #604c2e;
     }
 
     body {
       font-family: 'IM Fell English SC', serif;
-      background-color: var(--bg);
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       padding: 40px;
-      margin: 0;
-      transition: background 0.3s, color 0.3s;
+      text-align: center;
+      background-image: url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
     }
 
-    h1 {
+    h1, h2 {
       font-size: 2.5em;
-      text-shadow: 2px 2px #0003;
       margin-bottom: 20px;
     }
 
     .controls {
       margin-bottom: 20px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
     }
 
-    input[type="text"] {
+    input[type="text"], select {
       padding: 10px;
-      border-radius: 6px;
-      border: 1px solid var(--input-border);
-      background-color: var(--input-bg);
-      color: var(--text);
       font-size: 1em;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-color);
     }
 
     button {
       padding: 10px 14px;
-      background-color: var(--btn-bg);
-      border: none;
-      border-radius: 6px;
-      color: var(--text);
-      cursor: pointer;
-      font-family: 'IM Fell English SC', serif;
+      margin: 5px;
       font-size: 1em;
-      transition: background-color 0.2s;
+      cursor: pointer;
+      background: var(--button-bg);
+      color: var(--button-text);
+      border: 2px solid var(--button-border);
+      border-radius: 10px;
     }
 
     button:hover {
-      background-color: var(--btn-hover);
+      background: var(--button-border);
+      color: var(--bg-color);
     }
 
     .counter-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 20px;
-      width: 100%;
-      max-width: 1000px;
     }
 
     .dial {
-      background-color: var(--dial-bg);
-      border: 2px solid var(--dial-border);
-      border-radius: 16px;
+      background: var(--card-bg);
       padding: 20px;
-      text-align: center;
-      position: relative;
-      box-shadow: 0 0 10px #0003;
-      transition: background 0.3s, border 0.3s;
-    }
-
-    .name {
-      font-size: 1.2em;
-      margin-bottom: 12px;
+      border-radius: 12px;
+      border: 2px solid var(--border-color);
+      min-width: 200px;
     }
 
     .count {
-      font-size: 2.4em;
-      font-weight: bold;
-      margin-bottom: 10px;
+      font-size: 2em;
+      margin: 10px 0;
     }
 
-    .btn-row {
+    .btns {
       display: flex;
+      gap: 10px;
       justify-content: center;
-      gap: 12px;
     }
 
-    .action-btn {
-      background-color: var(--btn-bg);
-      color: var(--text);
-      font-size: 1.2em;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .action-btn:hover {
-      background-color: var(--btn-hover);
-    }
-
-    .remove-btn {
-      position: absolute;
-      top: 6px;
-      right: 10px;
-      background: none;
-      color: #aaa;
-      font-size: 1.2em;
-      cursor: pointer;
-      border: none;
-    }
-
-    .remove-btn:hover {
-      color: var(--accent);
-    }
-
-    .theme-toggle {
+    .class-label {
       font-size: 0.9em;
-      border: 1px solid var(--btn-hover);
+      margin-top: 5px;
+    }
+
+    #themeToggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
     }
   </style>
 </head>
 <body>
+  <button id="themeToggle" onclick="toggleTheme()">🌙</button>
 
   <h1>Baldur's Gate 3 – Honour Mode Kill Counter</h1>
 
   <div class="controls">
-    <input type="text" id="characterName" placeholder="Enter character name">
-    <button onclick="addCharacter()">Add Character</button>
+    <input type="text" id="charName" placeholder="Character name">
+    <select id="charClass">
+      <option value="">Select class</option>
+      <option>Barbarian</option>
+      <option>Bard</option>
+      <option>Cleric</option>
+      <option>Druid</option>
+      <option>Fighter</option>
+      <option>Monk</option>
+      <option>Paladin</option>
+      <option>Ranger</option>
+      <option>Rogue</option>
+      <option>Sorcerer</option>
+      <option>Warlock</option>
+      <option>Wizard</option>
+    </select>
+    <button onclick="addCharacter()">Add</button>
     <button onclick="resetAll()">Reset All</button>
-    <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+    <button onclick="partyDead()">Party Dead</button>
+    <button onclick="reviveAll()">Revive Party</button>
   </div>
 
-  <div class="counter-container" id="counterContainer"></div>
+  <h2>Current Party</h2>
+  <div id="counterContainer" class="counter-container"></div>
+
+  <h2>Fallen Party Members</h2>
+  <div id="graveyardContainer" class="counter-container"></div>
 
   <script>
-    let characters = JSON.parse(localStorage.getItem('bg3_characters')) || {};
-    let theme = localStorage.getItem('bg3_theme') || 'dark';
+    let party = JSON.parse(localStorage.getItem('party')) || {};
+    let graveyard = JSON.parse(localStorage.getItem('graveyard')) || {};
 
-    if (theme === 'light') {
-      document.body.classList.add('lightmode');
-    }
-    <!-- localStorage saving -->
-    function saveCharacters() {
-      localStorage.setItem('bg3_characters', JSON.stringify(characters));
+    function saveData() {
+      localStorage.setItem('party', JSON.stringify(party));
+      localStorage.setItem('graveyard', JSON.stringify(graveyard));
     }
 
-    function saveTheme() {
-      localStorage.setItem('bg3_theme', theme);
-    }
-
-    function renderCounters() {
+    function renderCharacters() {
       const container = document.getElementById('counterContainer');
       container.innerHTML = '';
-
-      Object.entries(characters).forEach(([id, { name, kills }]) => {
-        const dial = document.createElement('div');
-        dial.className = 'dial';
-
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'remove-btn';
-        removeBtn.textContent = '×';
-        removeBtn.onclick = (e) => {
-          e.stopPropagation();
-          removeCharacter(id);
-        };
-
-        const nameDiv = document.createElement('div');
-        nameDiv.className = 'name';
-        nameDiv.textContent = name;
-
-        const countDiv = document.createElement('div');
-        countDiv.className = 'count';
-        countDiv.id = `count-${id}`;
-        countDiv.textContent = kills;
-
-        const btnRow = document.createElement('div');
-        btnRow.className = 'btn-row';
-
-        const plusBtn = document.createElement('button');
-        plusBtn.className = 'action-btn';
-        plusBtn.textContent = '+';
-        plusBtn.onclick = () => incrementKill(id);
-
-        const minusBtn = document.createElement('button');
-        minusBtn.className = 'action-btn';
-        minusBtn.textContent = '–';
-        minusBtn.onclick = () => decrementKill(id);
-
-        btnRow.appendChild(minusBtn);
-        btnRow.appendChild(plusBtn);
-
-        dial.appendChild(removeBtn);
-        dial.appendChild(nameDiv);
-        dial.appendChild(countDiv);
-        dial.appendChild(btnRow);
-        container.appendChild(dial);
-      });
+      for (const [id, char] of Object.entries(party)) {
+        const el = document.createElement('div');
+        el.className = 'dial';
+        el.innerHTML = `
+          <div><strong>${char.name}</strong></div>
+          ${char.class ? `<div class="class-label">Class: ${char.class}</div>` : ''}
+          <div class="count">${char.kills}</div>
+          <div class="btns">
+            <button onclick="incrementKill('${id}')">+</button>
+            <button onclick="decrementKill('${id}')">–</button>
+            <button onclick="removeCharacter('${id}')">×</button>
+          </div>
+        `;
+        container.appendChild(el);
+      }
     }
 
-    function incrementKill(id) {
-      characters[id].kills++;
-      document.getElementById(`count-${id}`).textContent = characters[id].kills;
-      saveCharacters();
-    }
-
-    function decrementKill(id) {
-      if (characters[id].kills > 0) {
-        characters[id].kills--;
-        document.getElementById(`count-${id}`).textContent = characters[id].kills;
-        saveCharacters();
+    function renderGraveyard() {
+      const container = document.getElementById('graveyardContainer');
+      container.innerHTML = '';
+      for (const [id, char] of Object.entries(graveyard)) {
+        const el = document.createElement('div');
+        el.className = 'dial';
+        el.innerHTML = `
+          <div><strong>${char.name}</strong></div>
+          ${char.class ? `<div class="class-label">Class: ${char.class}</div>` : ''}
+          <div class="count">${char.kills}</div>
+        `;
+        container.appendChild(el);
       }
     }
 
     function addCharacter() {
-      const input = document.getElementById('characterName');
-      const name = input.value.trim();
-      if (!name) return alert("Please enter a character name.");
+      const name = document.getElementById('charName').value.trim();
+      const className = document.getElementById('charClass').value.trim();
+      if (!name) return alert('Enter a character name!');
       const id = Date.now().toString();
-      characters[id] = { name, kills: 0 };
-      input.value = '';
-      saveCharacters();
-      renderCounters();
+      party[id] = { name, kills: 0, class: className };
+      document.getElementById('charName').value = '';
+      document.getElementById('charClass').selectedIndex = 0;
+      saveData();
+      renderCharacters();
+    }
+
+    function incrementKill(id) {
+      party[id].kills += 1;
+      saveData();
+      renderCharacters();
+    }
+
+    function decrementKill(id) {
+      party[id].kills = Math.max(0, party[id].kills - 1);
+      saveData();
+      renderCharacters();
     }
 
     function removeCharacter(id) {
-      if (confirm(`Remove ${characters[id].name}?`)) {
-        delete characters[id];
-        saveCharacters();
-        renderCounters();
+      if (confirm('Delete this character?')) {
+        delete party[id];
+        saveData();
+        renderCharacters();
       }
     }
 
     function resetAll() {
-      if (confirm("Reset all kill counts?")) {
-        Object.keys(characters).forEach(id => characters[id].kills = 0);
-        saveCharacters();
-        renderCounters();
+      if (confirm('Reset all kill counts?')) {
+        for (const id in party) {
+          party[id].kills = 0;
+        }
+        saveData();
+        renderCharacters();
       }
-        <!-- Fix dogass buttons -->
     }
 
-   function toggleTheme() {
-      theme = theme === 'dark' ? 'light' : 'dark';  
-      document.body.classList.toggle('lightmode');
-      saveTheme();
+    function partyDead() {
+      if (confirm('Move all characters to the graveyard?')) {
+        graveyard = { ...graveyard, ...party };
+        party = {};
+        saveData();
+        renderCharacters();
+        renderGraveyard();
+      }
     }
 
-    renderCounters();
+    function reviveAll() {
+      if (confirm('Revive all fallen characters?')) {
+        party = { ...party, ...graveyard };
+        graveyard = {};
+        saveData();
+        renderCharacters();
+        renderGraveyard();
+      }
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      body.classList.toggle('light-mode');
+      const isLight = body.classList.contains('light-mode');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      document.getElementById('themeToggle').textContent = isLight ? '☀️' : '🌙';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        document.getElementById('themeToggle').textContent = '☀️';
+      } else {
+        document.getElementById('themeToggle').textContent = '🌙';
+      }
+      renderCharacters();
+      renderGraveyard();
+    });
   </script>
 </body>
 </html>
