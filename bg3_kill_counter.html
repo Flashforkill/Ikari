@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BG3 Honour Mode Kill Counter</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&display=swap');
+
+    :root {
+      --bg: #000;
+      --text: #fff;
+      --input-bg: #111;
+      --input-border: #555;
+      --btn-bg: #444;
+      --btn-hover: #666;
+      --dial-bg: #111;
+      --dial-border: #666;
+      --accent: #ff5c5c;
+    }
+
+    .lightmode {
+      --bg: #fff;
+      --text: #000;
+      --input-bg: #eee;
+      --input-border: #ccc;
+      --btn-bg: #ccc;
+      --btn-hover: #aaa;
+      --dial-bg: #f0f0f0;
+      --dial-border: #888;
+      --accent: #c00;
+    }
+
+    body {
+      font-family: 'IM Fell English SC', serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      margin: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      text-shadow: 2px 2px #0003;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--input-border);
+      background-color: var(--input-bg);
+      color: var(--text);
+      font-size: 1em;
+    }
+
+    button {
+      padding: 10px 14px;
+      background-color: var(--btn-bg);
+      border: none;
+      border-radius: 6px;
+      color: var(--text);
+      cursor: pointer;
+      font-family: 'IM Fell English SC', serif;
+      font-size: 1em;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: var(--btn-hover);
+    }
+
+    .counter-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .dial {
+      background-color: var(--dial-bg);
+      border: 2px solid var(--dial-border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 10px #0003;
+      transition: background 0.3s, border 0.3s;
+    }
+
+    .name {
+      font-size: 1.2em;
+      margin-bottom: 12px;
+    }
+
+    .count {
+      font-size: 2.4em;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .action-btn {
+      background-color: var(--btn-bg);
+      color: var(--text);
+      font-size: 1.2em;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .action-btn:hover {
+      background-color: var(--btn-hover);
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      background: none;
+      color: #aaa;
+      font-size: 1.2em;
+      cursor: pointer;
+      border: none;
+    }
+
+    .remove-btn:hover {
+      color: var(--accent);
+    }
+
+    .theme-toggle {
+      font-size: 0.9em;
+      border: 1px solid var(--btn-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Baldur's Gate 3 – Honour Mode Kill Counter</h1>
+
+  <div class="controls">
+    <input type="text" id="characterName" placeholder="Enter character name">
+    <button onclick="addCharacter()">Add Character</button>
+    <button onclick="resetAll()">Reset All</button>
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+  </div>
+
+  <div class="counter-container" id="counterContainer"></div>
+
+  <script>
+    let characters = JSON.parse(localStorage.getItem('bg3_characters')) || {};
+    let theme = localStorage.getItem('bg3_theme') || 'dark';
+
+    if (theme === 'light') {
+      document.body.classList.add('lightmode');
+    }
+
+    function saveCharacters() {
+      localStorage.setItem('bg3_characters', JSON.stringify(characters));
+    }
+
+    function saveTheme() {
+      localStorage.setItem('bg3_theme', theme);
+    }
+
+    function renderCounters() {
+      const container = document.getElementById('counterContainer');
+      container.innerHTML = '';
+
+      Object.entries(characters).forEach(([id, { name, kills }]) => {
+        const dial = document.createElement('div');
+        dial.className = 'dial';
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = '×';
+        removeBtn.onclick = (e) => {
+          e.stopPropagation();
+          removeCharacter(id);
+        };
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'name';
+        nameDiv.textContent = name;
+
+        const countDiv = document.createElement('div');
+        countDiv.className = 'count';
+        countDiv.id = `count-${id}`;
+        countDiv.textContent = kills;
+
+        const btnRow = document.createElement('div');
+        btnRow.className = 'btn-row';
+
+        const plusBtn = document.createElement('button');
+        plusBtn.className = 'action-btn';
+        plusBtn.textContent = '+';
+        plusBtn.onclick = () => incrementKill(id);
+
+        const minusBtn = document.createElement('button');
+        minusBtn.className = 'action-btn';
+        minusBtn.textContent = '–';
+        minusBtn.onclick = () => decrementKill(id);
+
+        btnRow.appendChild(minusBtn);
+        btnRow.appendChild(plusBtn);
+
+        dial.appendChild(removeBtn);
+        dial.appendChild(nameDiv);
+        dial.appendChild(countDiv);
+        dial.appendChild(btnRow);
+        container.appendChild(dial);
+      });
+    }
+
+    function incrementKill(id) {
+      characters[id].kills++;
+      document.getElementById(`count-${id}`).textContent = characters[id].kills;
+      saveCharacters();
+    }
+
+    function decrementKill(id) {
+      if (characters[id].kills > 0) {
+        characters[id].kills--;
+        document.getElementById(`count-${id}`).textContent = characters[id].kills;
+        saveCharacters();
+      }
+    }
+
+    function addCharacter() {
+      const input = document.getElementById('characterName');
+      const name = input.value.trim();
+      if (!name) return alert("Please enter a character name.");
+      const id = Date.now().toString();
+      characters[id] = { name, kills: 0 };
+      input.value = '';
+      saveCharacters();
+      renderCounters();
+    }
+
+    function removeCharacter(id) {
+      if (confirm(`Remove ${characters[id].name}?`)) {
+        delete characters[id];
+        saveCharacters();
+        renderCounters();
+      }
+    }
+
+    function resetAll() {
+      if (confirm("Reset all kill counts?")) {
+        Object.keys(characters).forEach(id => characters[id].kills = 0);
+        saveCharacters();
+        renderCounters();
+      }
+    }
+
+    function toggleTheme() {
+      theme = theme === 'dark' ? 'light' : 'dark';
+      document.body.classList.toggle('lightmode');
+      saveTheme();
+    }
+
+    renderCounters();
+  </script>
+</body>
+</html>
