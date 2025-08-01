@@ -175,7 +175,7 @@
     if (theme === 'light') {
       document.body.classList.add('lightmode');
     }
-
+    <!-- localStorage saving -->
     function saveCharacters() {
       localStorage.setItem('bg3_characters', JSON.stringify(characters));
     }
@@ -272,10 +272,11 @@
         saveCharacters();
         renderCounters();
       }
+        <!-- Fix dogass buttons -->
     }
 
-    function toggleTheme() {
-      theme = theme === 'dark' ? 'light' : 'dark';
+   function toggleTheme() {
+      theme = theme === 'dark' ? 'light' : 'dark';  
       document.body.classList.toggle('lightmode');
       saveTheme();
     }
